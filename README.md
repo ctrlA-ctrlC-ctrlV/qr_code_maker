@@ -1,6 +1,6 @@
 # QR Code Maker
 
-A fast, efficient web and mobile application for generating QR codes locally in the browser/device. Built as a **pnpm monorepo** by **Modular House** (Dublin, Ireland).
+A fast, efficient web and mobile application for generating QR codes locally in the browser/device. Built as a **pnpm monorepo**.
 
 ## Project Structure
 
