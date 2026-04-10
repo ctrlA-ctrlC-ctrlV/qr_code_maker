@@ -1,0 +1,17 @@
+{
+  "name": "qr-code-maker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "QR Code Maker - A pnpm monorepo web application for Modular House",
+  "scripts": {
+    "dev": "pnpm --filter @qr-code-maker/web dev",
+    "build": "pnpm --filter @qr-code-maker/web build",
+    "preview": "pnpm --filter @qr-code-maker/web preview",
+    "lint": "pnpm -r lint",
+    "type-check": "pnpm -r type-check"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
