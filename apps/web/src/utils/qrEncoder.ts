@@ -15,7 +15,9 @@ import {
   QrInputType,
   type QrCodeConfig,
   type WiFiCredentials,
+  type VCardContact,
 } from "@qr-code-maker/shared";
+import { generateVCardString } from "./vCardEncoder";
 
 /* -------------------------------------------------------------------------- */
 /*  Input Formatting                                                          */
@@ -51,7 +53,8 @@ export function formatWiFiString(credentials: WiFiCredentials): string {
 export function formatInputValue(
   inputType: QrInputType,
   value: string,
-  wifiCredentials?: WiFiCredentials
+  wifiCredentials?: WiFiCredentials,
+  vCardContact?: VCardContact
 ): string {
   switch (inputType) {
     case QrInputType.Email:
@@ -60,6 +63,8 @@ export function formatInputValue(
       return `tel:${value}`;
     case QrInputType.WiFi:
       return wifiCredentials ? formatWiFiString(wifiCredentials) : value;
+    case QrInputType.VCard:
+      return vCardContact ? generateVCardString(vCardContact) : value;
     case QrInputType.Url:
     case QrInputType.PlainText:
     default:
