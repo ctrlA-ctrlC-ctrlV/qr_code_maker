@@ -17,6 +17,7 @@ import {
   WiFiEncryption,
   type QrCodeConfig,
   type ValidationResult,
+  type VCardContact,
   type WiFiCredentials,
 } from "@qr-code-maker/shared";
 import { validateInput } from "../utils/validation";
@@ -38,6 +39,8 @@ interface QrConfigState {
   inputType: QrInputType;
   /** Wi-Fi credentials (only relevant when inputType is WiFi). */
   wifiCredentials: WiFiCredentials;
+  /** vCard contact fields (only relevant when inputType is VCard). */
+  vCardContact: VCardContact;
   /** Visual and encoding settings. */
   size: number;
   errorCorrectionLevel: ErrorCorrectionLevel;
@@ -59,6 +62,7 @@ type QrConfigAction =
   | { type: "SET_RAW_VALUE"; payload: string }
   | { type: "SET_INPUT_TYPE"; payload: QrInputType }
   | { type: "SET_WIFI_CREDENTIALS"; payload: Partial<WiFiCredentials> }
+  | { type: "SET_VCARD_CONTACT"; payload: Partial<VCardContact> }
   | { type: "SET_SIZE"; payload: number }
   | { type: "SET_ERROR_CORRECTION"; payload: ErrorCorrectionLevel }
   | { type: "SET_FOREGROUND_COLOR"; payload: string }
@@ -76,11 +80,31 @@ const defaultWiFiCredentials: WiFiCredentials = {
   hidden: false,
 };
 
+/** Empty vCard contact used when the form first renders. */
+const defaultVCardContact: VCardContact = {
+  firstName: "",
+  lastName: "",
+  phoneMobile: "",
+  phoneWork: "",
+  emailPersonal: "",
+  emailWork: "",
+  jobTitle: "",
+  company: "",
+  website: "",
+  streetAddress: "",
+  city: "",
+  stateRegion: "",
+  postalCode: "",
+  country: "",
+  notes: "",
+};
+
 /** Fully populated initial state derived from shared defaults. */
 const initialState: QrConfigState = {
   rawValue: "",
   inputType: QrInputType.PlainText,
   wifiCredentials: defaultWiFiCredentials,
+  vCardContact: defaultVCardContact,
   size: QR_DEFAULTS.size,
   errorCorrectionLevel: QR_DEFAULTS.errorCorrectionLevel,
   foregroundColor: QR_DEFAULTS.foregroundColor,
@@ -105,21 +129,25 @@ function qrConfigReducer(
       const validation = validateInput(
         state.inputType,
         action.payload,
-        state.inputType === QrInputType.WiFi ? state.wifiCredentials : undefined
+        state.inputType === QrInputType.WiFi ? state.wifiCredentials : undefined,
+        state.inputType === QrInputType.VCard ? state.vCardContact : undefined
       );
       return { ...state, rawValue: action.payload, validation };
     }
 
     case "SET_INPUT_TYPE": {
       /*
-       * Reset the raw value when switching types to avoid stale validation
-       * artefacts (e.g. a URL left over when switching to Phone).
+       * Reset the raw value and type-specific state when switching types to
+       * avoid stale validation artefacts (e.g. a URL left over when switching
+       * to Phone).
        */
-      const validation = validateInput(action.payload, "", undefined);
+      const validation = validateInput(action.payload, "", undefined, undefined);
       return {
         ...state,
         inputType: action.payload,
         rawValue: "",
+        wifiCredentials: defaultWiFiCredentials,
+        vCardContact: defaultVCardContact,
         validation,
       };
     }
@@ -128,6 +156,12 @@ function qrConfigReducer(
       const merged = { ...state.wifiCredentials, ...action.payload };
       const validation = validateInput(QrInputType.WiFi, "", merged);
       return { ...state, wifiCredentials: merged, validation };
+    }
+
+    case "SET_VCARD_CONTACT": {
+      const merged = { ...state.vCardContact, ...action.payload };
+      const validation = validateInput(QrInputType.VCard, "", undefined, merged);
+      return { ...state, vCardContact: merged, validation };
     }
 
     case "SET_SIZE":
@@ -161,6 +195,8 @@ interface UseQrConfigReturn {
   inputType: QrInputType;
   /** Wi-Fi credentials state. */
   wifiCredentials: WiFiCredentials;
+  /** vCard contact state. */
+  vCardContact: VCardContact;
   /** Resolved QR code configuration ready for encoding. */
   config: QrCodeConfig;
   /** Latest validation result. */
@@ -171,6 +207,8 @@ interface UseQrConfigReturn {
   setInputType: (type: QrInputType) => void;
   /** Partially update Wi-Fi credentials. */
   setWifiCredentials: (credentials: Partial<WiFiCredentials>) => void;
+  /** Partially update vCard contact fields. */
+  setVCardContact: (fields: Partial<VCardContact>) => void;
   /** Update QR code rendered size. */
   setSize: (size: number) => void;
   /** Update error correction level. */
@@ -197,10 +235,12 @@ export function useQrConfig(): UseQrConfigReturn {
   const [state, dispatch] = useReducer(qrConfigReducer, initialState);
 
   /* Derive the formatted value that will actually be encoded. */
-  const formattedValue =
-    state.inputType === QrInputType.WiFi
-      ? formatInputValue(state.inputType, state.rawValue, state.wifiCredentials)
-      : formatInputValue(state.inputType, state.rawValue);
+  const formattedValue = formatInputValue(
+    state.inputType,
+    state.rawValue,
+    state.inputType === QrInputType.WiFi ? state.wifiCredentials : undefined,
+    state.inputType === QrInputType.VCard ? state.vCardContact : undefined
+  );
 
   /** Assembled configuration object consumed by the encoder and renderer. */
   const config: QrCodeConfig = {
@@ -229,6 +269,12 @@ export function useQrConfig(): UseQrConfigReturn {
     []
   );
 
+  const setVCardContact = useCallback(
+    (fields: Partial<VCardContact>) =>
+      dispatch({ type: "SET_VCARD_CONTACT", payload: fields }),
+    []
+  );
+
   const setSize = useCallback(
     (size: number) => dispatch({ type: "SET_SIZE", payload: size }),
     []
@@ -254,11 +300,13 @@ export function useQrConfig(): UseQrConfigReturn {
     rawValue: state.rawValue,
     inputType: state.inputType,
     wifiCredentials: state.wifiCredentials,
+    vCardContact: state.vCardContact,
     config,
     validation: state.validation,
     setRawValue,
     setInputType,
     setWifiCredentials,
+    setVCardContact,
     setSize,
     setErrorCorrectionLevel,
     setForegroundColor,
