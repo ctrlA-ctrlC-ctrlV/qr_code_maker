@@ -41,6 +41,7 @@ export enum QrInputType {
   Email = "email",
   Phone = "phone",
   WiFi = "wifi",
+  VCard = "vcard",
 }
 
 /* -------------------------------------------------------------------------- */
@@ -86,6 +87,50 @@ export interface WiFiCredentials {
   encryption: WiFiEncryption;
   /** Whether the SSID is hidden (not broadcast). */
   hidden: boolean;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  vCard Contact Data                                                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Represents contact information used to build a vCard 3.0 payload.
+ *
+ * Only `firstName` or `lastName` is required; all other fields are optional.
+ * The encoder omits any property whose value is an empty string, ensuring
+ * the generated vCard contains only user-supplied data.
+ */
+export interface VCardContact {
+  /** Contact's first (given) name. */
+  firstName: string;
+  /** Contact's last (family) name. */
+  lastName: string;
+  /** Mobile phone number. */
+  phoneMobile: string;
+  /** Work phone number. */
+  phoneWork: string;
+  /** Personal email address. */
+  emailPersonal: string;
+  /** Work email address. */
+  emailWork: string;
+  /** Job title / position. */
+  jobTitle: string;
+  /** Company or organisation name. */
+  company: string;
+  /** Personal or company website URL. */
+  website: string;
+  /** Street address (single line). */
+  streetAddress: string;
+  /** City name. */
+  city: string;
+  /** State, province, or region. */
+  stateRegion: string;
+  /** Postal / ZIP code. */
+  postalCode: string;
+  /** Country name. */
+  country: string;
+  /** Free-text notes (max 200 characters). */
+  notes: string;
 }
 
 /**
@@ -160,4 +205,6 @@ export const QR_DEFAULTS = Object.freeze({
   backgroundColor: "#ffffff",
   /** Maximum character count for QR code input (version 40, EC level L). */
   maxInputLength: 4296,
+  /** Maximum character count for the vCard notes field. */
+  maxNotesLength: 200,
 });
