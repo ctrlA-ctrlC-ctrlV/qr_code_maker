@@ -160,7 +160,7 @@ class _QrCodeScreenState extends State<QrCodeScreen> {
 
               /* Footer */
               Text(
-                'Built by Modular House -- Dublin, Ireland',
+                'Built by Zhaoxiang Qiu',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,

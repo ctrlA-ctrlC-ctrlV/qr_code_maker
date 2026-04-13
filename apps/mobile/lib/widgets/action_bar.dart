@@ -85,7 +85,7 @@ class ActionBar extends StatelessWidget {
 
     await Share.shareXFiles(
       [XFile(file.path)],
-      text: 'QR Code generated with QR Code Maker by Modular House',
+      text: 'QR Code generated with QR Code Maker by Zhaoxiang',
     );
   }
 
