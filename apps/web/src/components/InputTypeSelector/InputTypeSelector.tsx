@@ -34,6 +34,7 @@ const INPUT_TYPE_LABELS: ReadonlyArray<{ type: QrInputType; label: string }> = [
   { type: QrInputType.Email, label: "Email" },
   { type: QrInputType.Phone, label: "Phone" },
   { type: QrInputType.WiFi, label: "Wi-Fi" },
+  { type: QrInputType.VCard, label: "vCard" },
 ];
 
 /* -------------------------------------------------------------------------- */

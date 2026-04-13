@@ -49,6 +49,7 @@ const PLACEHOLDERS: Record<QrInputType, string> = {
   [QrInputType.Email]: "user@example.com",
   [QrInputType.Phone]: "+353 1 234 5678",
   [QrInputType.WiFi]: "",
+  [QrInputType.VCard]: "",
 };
 
 /* -------------------------------------------------------------------------- */
