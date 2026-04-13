@@ -11,10 +11,12 @@
  * user types.
  */
 
+import { QrInputType } from "@qr-code-maker/shared";
 import { useQrConfig } from "./hooks/useQrConfig";
 import { useQrGenerator } from "./hooks/useQrGenerator";
 import { InputTypeSelector } from "./components/InputTypeSelector";
 import { QrInput } from "./components/QrInput";
+import { VCardForm } from "./components/VCardForm";
 import { CustomisationPanel } from "./components/CustomisationPanel";
 import { QrPreview } from "./components/QrPreview";
 import { ActionBar } from "./components/ActionBar";
@@ -30,11 +32,13 @@ export function App() {
     rawValue,
     inputType,
     wifiCredentials,
+    vCardContact,
     config,
     validation,
     setRawValue,
     setInputType,
     setWifiCredentials,
+    setVCardContact,
     setSize,
     setErrorCorrectionLevel,
     setForegroundColor,
@@ -69,14 +73,22 @@ export function App() {
             onTypeChange={setInputType}
           />
 
-          <QrInput
-            inputType={inputType}
-            value={rawValue}
-            onValueChange={setRawValue}
-            wifiCredentials={wifiCredentials}
-            onWifiChange={setWifiCredentials}
-            validation={validation}
-          />
+          {inputType === QrInputType.VCard ? (
+            <VCardForm
+              contact={vCardContact}
+              onContactChange={setVCardContact}
+              validation={validation}
+            />
+          ) : (
+            <QrInput
+              inputType={inputType}
+              value={rawValue}
+              onValueChange={setRawValue}
+              wifiCredentials={wifiCredentials}
+              onWifiChange={setWifiCredentials}
+              validation={validation}
+            />
+          )}
 
           <CustomisationPanel
             size={config.size}
