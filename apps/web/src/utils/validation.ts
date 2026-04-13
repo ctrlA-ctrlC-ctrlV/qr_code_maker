@@ -11,6 +11,7 @@ import {
   QR_DEFAULTS,
   type ValidationResult,
   type WiFiCredentials,
+  type VCardContact,
 } from "@qr-code-maker/shared";
 
 /* -------------------------------------------------------------------------- */
@@ -96,6 +97,31 @@ function validateWiFi(credentials: WiFiCredentials): ValidationResult {
   return { isValid: true, errorMessage: "" };
 }
 
+/**
+ * Validates vCard contact data. At minimum, either the first name or last
+ * name must be provided. The notes field is capped at the configured maximum.
+ */
+function validateVCard(contact: VCardContact): ValidationResult {
+  const hasFirstName = contact.firstName.trim().length > 0;
+  const hasLastName = contact.lastName.trim().length > 0;
+
+  if (!hasFirstName && !hasLastName) {
+    return {
+      isValid: false,
+      errorMessage: "At least a first name or last name is required.",
+    };
+  }
+
+  if (contact.notes.length > QR_DEFAULTS.maxNotesLength) {
+    return {
+      isValid: false,
+      errorMessage: `Notes must not exceed ${QR_DEFAULTS.maxNotesLength} characters.`,
+    };
+  }
+
+  return { isValid: true, errorMessage: "" };
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Public API                                                                */
 /* -------------------------------------------------------------------------- */
@@ -103,15 +129,17 @@ function validateWiFi(credentials: WiFiCredentials): ValidationResult {
 /**
  * Dispatches to the appropriate validator based on the input type.
  *
- * @param inputType - The semantic type of the QR code content.
- * @param value     - The raw string to validate.
- * @param wifiData  - Optional Wi-Fi credentials when inputType is WiFi.
+ * @param inputType  - The semantic type of the QR code content.
+ * @param value      - The raw string to validate.
+ * @param wifiData   - Optional Wi-Fi credentials when inputType is WiFi.
+ * @param vCardData  - Optional vCard contact when inputType is VCard.
  * @returns A `ValidationResult` describing whether the input is acceptable.
  */
 export function validateInput(
   inputType: QrInputType,
   value: string,
-  wifiData?: WiFiCredentials
+  wifiData?: WiFiCredentials,
+  vCardData?: VCardContact
 ): ValidationResult {
   switch (inputType) {
     case QrInputType.PlainText:
@@ -126,6 +154,10 @@ export function validateInput(
       return wifiData
         ? validateWiFi(wifiData)
         : { isValid: false, errorMessage: "Wi-Fi credentials are required." };
+    case QrInputType.VCard:
+      return vCardData
+        ? validateVCard(vCardData)
+        : { isValid: false, errorMessage: "Contact information is required." };
     default:
       return validatePlainText(value);
   }
